@@ -4,8 +4,6 @@ import requests
 import json
 import os
 
-api_key = os.environ.get("HF_API_KEY")
-
 from typing import Dict, List, Any, Optional
 import time
 import re
@@ -16,7 +14,7 @@ app = Flask(__name__)
 
 # Configuration
 # Replace this with your Hugging Face API key
-HUGGINGFACE_API_KEY = os.environ.get("HUGGINGFACE_API_KEY", "")  
+HUGGINGFACE_API_KEY = os.environ.get("HF_API_KEY")  
 # Default to a Llama3 model on Hugging Face
 DEFAULT_MODEL = "google/gemma-7b" 
 HUGGINGFACE_API_URL = "https://api-inference.huggingface.co/models/"
