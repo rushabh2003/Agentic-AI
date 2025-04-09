@@ -1,0 +1,256 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic AI Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <style>
+        .loading-dots:after {
+            content: ' .';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: ' .'; }
+            40% { content: ' ..'; }
+            60% { content: ' ...'; }
+            80%, 100% { content: ' '; }
+        }
+        
+        .agent-message {
+            transition: all 0.3s ease;
+        }
+        
+        .agent-researcher {
+            border-left: 4px solid #2563eb;
+        }
+        
+        .agent-writer {
+            border-left: 4px solid #10b981;
+        }
+        
+        .markdown h1 { font-size: 1.5rem; font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .markdown h2 { font-size: 1.25rem; font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .markdown h3 { font-size: 1.1rem; font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .markdown ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+        .markdown ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
+        .markdown p { margin: 0.5rem 0; }
+        .markdown code { background-color: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 0.25rem; }
+        .markdown pre { background-color: #f3f4f6; padding: 0.75rem; border-radius: 0.25rem; overflow-x: auto; margin: 0.75rem 0; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-indigo-600 text-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-11a1 1 0 11-2 0 1 1 0 012 0zm0 2a1 1 0 011 1v4a1 1 0 11-2 0v-4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-bold text-xl">Agentic AI Suite</span>
+                </div>
+                <div class="space-x-6">
+                    <a href="/" class="font-medium hover:text-indigo-200 border-b-2 border-white">Content Creator</a>
+                    <a href="/resume-builder" class="font-medium hover:text-indigo-200">Resume Builder</a>
+                    <a href="/linkedin-post" class="font-medium hover:text-indigo-200">LinkedIn Post Maker</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-indigo-700">AI Content Creator</h1>
+            <p class="text-gray-600 mt-2">Powered by two collaborative agents using Llama3.2</p>
+        </header>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">What can I help you with today?</h2>
+            <form id="taskForm" class="space-y-4">
+                <div>
+                    <label for="taskInput" class="block text-sm font-medium text-gray-700 mb-1">Enter your task:</label>
+                    <textarea 
+                        id="taskInput" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        rows="3" 
+                        placeholder="e.g., 'Create an informative article about renewable energy sources'"
+                        required
+                    ></textarea>
+                </div>
+                <div class="flex justify-end">
+                    <button 
+                        type="submit" 
+                        id="submitButton"
+                        class="px-6 py-2 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        Process Task
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="loadingIndicator" class="hidden mb-6 p-4 bg-gray-100 rounded-lg text-center">
+            <div class="flex items-center justify-center">
+                <svg class="animate-spin h-6 w-6 text-indigo-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-gray-700 font-medium loading-dots">Processing your request</span>
+            </div>
+        </div>
+        
+        <div id="resultContainer" class="hidden space-y-6">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-indigo-50 px-6 py-4 border-b">
+                    <h3 class="text-lg font-medium text-indigo-700 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                        Research Results
+                    </h3>
+                </div>
+                <div class="p-6 bg-white agent-message agent-researcher">
+                    <div id="researchResults" class="markdown prose"></div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-green-50 px-6 py-4 border-b">
+                    <h3 class="text-lg font-medium text-green-700 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                        </svg>
+                        Final Content
+                    </h3>
+                </div>
+                <div class="p-6 bg-white agent-message agent-writer">
+                    <div id="finalContent" class="markdown prose"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="historyContainer" class="mt-12 hidden">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Previous Tasks</h2>
+            <div id="taskHistory" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const taskForm = document.getElementById('taskForm');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const resultContainer = document.getElementById('resultContainer');
+            const researchResults = document.getElementById('researchResults');
+            const finalContent = document.getElementById('finalContent');
+            const historyContainer = document.getElementById('historyContainer');
+            const taskHistory = document.getElementById('taskHistory');
+            
+            // Process the task
+            taskForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const taskInput = document.getElementById('taskInput').value.trim();
+                if (!taskInput) return;
+                
+                // Show loading indicator
+                loadingIndicator.classList.remove('hidden');
+                resultContainer.classList.add('hidden');
+                
+                try {
+                    const response = await fetch('/api/task', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ task: taskInput })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to process task');
+                    }
+                    
+                    const result = await response.json();
+                    
+                    // Update the UI with results
+                    researchResults.innerHTML = marked.parse(result.research);
+                    finalContent.innerHTML = marked.parse(result.final_content);
+                    
+                    // Hide loading, show results
+                    loadingIndicator.classList.add('hidden');
+                    resultContainer.classList.remove('hidden');
+                    
+                    // Load task history
+                    loadTaskHistory();
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while processing your task. Please try again.');
+                    loadingIndicator.classList.add('hidden');
+                }
+            });
+            
+            // Load task history from API
+            async function loadTaskHistory() {
+                try {
+                    const response = await fetch('/api/history');
+                    if (!response.ok) {
+                        throw new Error('Failed to load history');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.history && data.history.length > 0) {
+                        // Clear existing history
+                        taskHistory.innerHTML = '';
+                        
+                        // Show history container
+                        historyContainer.classList.remove('hidden');
+                        
+                        // Add each task to history
+                        data.history.forEach(task => {
+                            const taskItem = document.createElement('div');
+                            taskItem.className = 'bg-white rounded-lg shadow-sm p-4 border border-gray-200';
+                            taskItem.innerHTML = `
+                                <h3 class="font-medium text-indigo-700">${escapeHtml(task.user_task)}</h3>
+                                <p class="text-sm text-gray-500 mt-1">${task.timestamp}</p>
+                            `;
+                            
+                            // Add click event to show this task's results
+                            taskItem.addEventListener('click', function() {
+                                researchResults.innerHTML = marked.parse(task.research);
+                                finalContent.innerHTML = marked.parse(task.final_content);
+                                resultContainer.classList.remove('hidden');
+                                window.scrollTo({
+                                    top: resultContainer.offsetTop - 20,
+                                    behavior: 'smooth'
+                                });
+                            });
+                            
+                            taskHistory.prepend(taskItem);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error loading history:', error);
+                }
+            }
+            
+            // Helper function to escape HTML
+            function escapeHtml(unsafe) {
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+            
+            // Load task history on page load
+            loadTaskHistory();
+        });
+    </script>
+</body>
+</html>

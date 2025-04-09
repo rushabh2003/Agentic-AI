@@ -1,0 +1,247 @@
+<!-- templates/resume_builder.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LaTeX Resume Builder | Agentic AI Suite</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/stex/stex.min.js"></script>
+    <style>
+        .loading-dots:after {
+            content: ' .';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: ' .'; }
+            40% { content: ' ..'; }
+            60% { content: ' ...'; }
+            80%, 100% { content: ' '; }
+        }
+        
+        .CodeMirror {
+            height: auto;
+            min-height: 300px;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-indigo-600 text-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-11a1 1 0 11-2 0 1 1 0 012 0zm0 2a1 1 0 011 1v4a1 1 0 11-2 0v-4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-bold text-xl">Agentic AI Suite</span>
+                </div>
+                <div class="space-x-6">
+                    <a href="/" class="font-medium hover:text-indigo-200">Content Creator</a>
+                    <a href="/resume-builder" class="font-medium hover:text-indigo-200 border-b-2 border-white">Resume Builder</a>
+                    <a href="/linkedin-post" class="font-medium hover:text-indigo-200">LinkedIn Post Maker</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-indigo-700">LaTeX Resume Builder</h1>
+            <p class="text-gray-600 mt-2">Create a professional LaTeX resume with AI assistance</p>
+        </header>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Enter Your Information</h2>
+            <form id="resumeForm" class="space-y-6">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                        <input type="text" id="phone" name="phone" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="education" class="block text-sm font-medium text-gray-700 mb-1">Education (degrees, schools, dates)</label>
+                    <textarea id="education" name="education" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required></textarea>
+                </div>
+                
+                <div>
+                    <label for="experience" class="block text-sm font-medium text-gray-700 mb-1">Work Experience (positions, companies, dates, responsibilities)</label>
+                    <textarea id="experience" name="experience" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required></textarea>
+                </div>
+                
+                <div>
+                    <label for="skills" class="block text-sm font-medium text-gray-700 mb-1">Skills (technical, soft, languages)</label>
+                    <textarea id="skills" name="skills" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required></textarea>
+                </div>
+                
+                <div>
+                    <label for="projects" class="block text-sm font-medium text-gray-700 mb-1">Projects (optional)</label>
+                    <textarea id="projects" name="projects" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button 
+                        type="submit" 
+                        id="submitButton"
+                        class="px-6 py-2 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        Generate Resume
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="loadingIndicator" class="hidden mb-6 p-4 bg-gray-100 rounded-lg text-center">
+            <div class="flex items-center justify-center">
+                <svg class="animate-spin h-6 w-6 text-indigo-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-gray-700 font-medium loading-dots">Generating your LaTeX resume</span>
+            </div>
+        </div>
+        
+        <div id="resultContainer" class="hidden">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-indigo-50 px-6 py-4 border-b flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-indigo-700 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+                        </svg>
+                        Your LaTeX Resume Code
+                    </h3>
+                    <button id="copyButton" class="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        Copy Code
+                    </button>
+                </div>
+                <div class="p-6 bg-white">
+                    <textarea id="latexCode" class="w-full"></textarea>
+                    <p class="text-sm text-gray-600 mt-4">This LaTeX code can be compiled with any LaTeX compiler like Overleaf, TeXworks, or online LaTeX editors.</p>
+                    <div class="mt-4 flex justify-end">
+                        <a 
+                            href="https://www.overleaf.com/login" 
+                            target="_blank" 
+                            class="px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        >
+                            Open in Overleaf
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const resumeForm = document.getElementById('resumeForm');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const resultContainer = document.getElementById('resultContainer');
+            const copyButton = document.getElementById('copyButton');
+            let editor;
+            
+            // Initialize CodeMirror
+            setTimeout(() => {
+                editor = CodeMirror.fromTextArea(document.getElementById("latexCode"), {
+                    mode: "stex",
+                    lineNumbers: true,
+                    lineWrapping: true,
+                    theme: "default",
+                    readOnly: false
+                });
+            }, 100);
+            
+            // Process the form
+            resumeForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Get form data
+                const formData = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    education: document.getElementById('education').value,
+                    experience: document.getElementById('experience').value,
+                    skills: document.getElementById('skills').value,
+                    projects: document.getElementById('projects').value
+                };
+                
+                // Show loading indicator
+                loadingIndicator.classList.remove('hidden');
+                resultContainer.classList.add('hidden');
+                
+                try {
+                    const response = await fetch('/api/create-resume', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to generate resume');
+                    }
+                    
+                    const result = await response.json();
+                    
+                    // Update the editor with the LaTeX code
+                    if (editor) {
+                        editor.setValue(result.latex_code);
+                        setTimeout(() => editor.refresh(), 10);
+                    }
+                    
+                    // Hide loading, show results
+                    loadingIndicator.classList.add('hidden');
+                    resultContainer.classList.remove('hidden');
+                    
+                    // Scroll to results
+                    window.scrollTo({
+                        top: resultContainer.offsetTop - 20,
+                        behavior: 'smooth'
+                    });
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while generating your resume. Please try again.');
+                    loadingIndicator.classList.add('hidden');
+                }
+            });
+            
+            // Copy code to clipboard
+            copyButton.addEventListener('click', function() {
+                const code = editor ? editor.getValue() : document.getElementById('latexCode').value;
+                
+                navigator.clipboard.writeText(code).then(function() {
+                    const originalText = copyButton.textContent;
+                    copyButton.textContent = 'Copied!';
+                    setTimeout(() => {
+                        copyButton.textContent = originalText;
+                    }, 2000);
+                }).catch(function(err) {
+                    console.error('Failed to copy text: ', err);
+                    alert('Failed to copy code. Please select and copy manually.');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

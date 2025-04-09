@@ -1,0 +1,278 @@
+<!-- templates/linkedin_post.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Post Creator - Agentic AI Suite</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .loading-dots:after {
+            content: ' .';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: ' .'; }
+            40% { content: ' ..'; }
+            60% { content: ' ...'; }
+            80%, 100% { content: ' '; }
+        }
+        
+        .agent-message {
+            transition: all 0.3s ease;
+        }
+        
+        .linkedin-blue-border {
+            border-left: 4px solid #0a66c2;
+        }
+        
+        .markdown h1 { font-size: 1.5rem; font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .markdown h2 { font-size: 1.25rem; font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .markdown h3 { font-size: 1.1rem; font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .markdown ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+        .markdown ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
+        .markdown p { margin: 0.5rem 0; }
+        .markdown code { background-color: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 0.25rem; }
+        .markdown pre { background-color: #f3f4f6; padding: 0.75rem; border-radius: 0.25rem; overflow-x: auto; margin: 0.75rem 0; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-indigo-600 text-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-11a1 1 0 11-2 0 1 1 0 012 0zm0 2a1 1 0 011 1v4a1 1 0 11-2 0v-4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-bold text-xl">Agentic AI Suite</span>
+                </div>
+                <div class="space-x-6">
+                    <a href="/" class="font-medium hover:text-indigo-200">Content Creator</a>
+                    <a href="/resume-builder" class="font-medium hover:text-indigo-200">Resume Builder</a>
+                    <a href="/linkedin-post" class="font-medium hover:text-indigo-200 border-b-2 border-white">LinkedIn Post Maker</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-indigo-700">LinkedIn Post Creator</h1>
+            <p class="text-gray-600 mt-2">Create engaging professional posts for LinkedIn</p>
+        </header>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Post Form -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Post Details</h2>
+                <form id="postForm" class="space-y-4">
+                    <div>
+                        <label for="topic" class="block text-sm font-medium text-gray-700 mb-1">Topic/Title</label>
+                        <input 
+                            type="text" 
+                            id="topic" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            placeholder="E.g., New Product Launch, Industry Trend, Career Achievement"
+                            required
+                        >
+                    </div>
+                    
+                    <div>
+                        <label for="key_points" class="block text-sm font-medium text-gray-700 mb-1">Key Points</label>
+                        <textarea 
+                            id="key_points" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            rows="4" 
+                            placeholder="Enter 3-5 key points you want to include in your post"
+                            required
+                        ></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tone</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium tone-btn selected" data-tone="Professional">Professional</button>
+                            <button type="button" class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium tone-btn" data-tone="Conversational">Conversational</button>
+                            <button type="button" class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium tone-btn" data-tone="Inspirational">Inspirational</button>
+                            <button type="button" class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium tone-btn" data-tone="Educational">Educational</button>
+                            <button type="button" class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium tone-btn" data-tone="Formal">Formal</button>
+                        </div>
+                        <input type="hidden" id="tone" value="Professional">
+                    </div>
+                    
+                    <div>
+                        <label for="audience" class="block text-sm font-medium text-gray-700 mb-1">Target Audience</label>
+                        <input 
+                            type="text" 
+                            id="audience" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            placeholder="E.g., Industry Professionals, Job Seekers, Potential Clients"
+                        >
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button 
+                            type="submit" 
+                            class="px-6 py-2 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                            Generate Post
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Post Preview -->
+            <div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="bg-blue-50 px-6 py-4 border-b flex justify-between items-center">
+                        <h3 class="text-lg font-medium text-blue-700 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+                            </svg>
+                            Generated LinkedIn Post
+                        </h3>
+                        <button 
+                            id="copyButton" 
+                            class="text-sm px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 focus:outline-none hidden"
+                        >
+                            Copy Post
+                        </button>
+                    </div>
+                    
+                    <!-- Loading Indicator -->
+                    <div id="loadingIndicator" class="hidden p-6 text-center">
+                        <div class="flex items-center justify-center">
+                            <svg class="animate-spin h-6 w-6 text-indigo-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span class="text-gray-700 font-medium loading-dots">Creating your LinkedIn post</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Post Content -->
+                    <div id="postResult" class="p-6 bg-white agent-message linkedin-blue-border hidden">
+                        <div class="mb-4 flex items-center">
+                            <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl">in</div>
+                        </div>
+                        <div id="postContent" class="markdown prose"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tone selector functionality
+            const toneButtons = document.querySelectorAll('.tone-btn');
+            const toneInput = document.getElementById('tone');
+            
+            toneButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Reset all button styles
+                    toneButtons.forEach(btn => {
+                        btn.classList.remove('selected');
+                        btn.classList.remove('bg-indigo-100');
+                        btn.classList.remove('text-indigo-800');
+                        btn.classList.add('bg-gray-100');
+                        btn.classList.add('text-gray-800');
+                    });
+                    
+                    // Style the selected button
+                    this.classList.add('selected');
+                    this.classList.remove('bg-gray-100');
+                    this.classList.remove('text-gray-800');
+                    this.classList.add('bg-indigo-100');
+                    this.classList.add('text-indigo-800');
+                    
+                    // Update the hidden input
+                    toneInput.value = this.dataset.tone;
+                });
+            });
+            
+            // Form submission
+            const postForm = document.getElementById('postForm');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const postResult = document.getElementById('postResult');
+            const postContent = document.getElementById('postContent');
+            const copyButton = document.getElementById('copyButton');
+            
+            postForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Show loader, hide results
+                loadingIndicator.classList.remove('hidden');
+                postResult.classList.add('hidden');
+                copyButton.classList.add('hidden');
+                
+                // Gather form data
+                const formData = {
+                    topic: document.getElementById('topic').value,
+                    key_points: document.getElementById('key_points').value,
+                    tone: document.getElementById('tone').value,
+                    audience: document.getElementById('audience').value
+                };
+                
+                try {
+                    // Send request to server
+                    const response = await fetch('/api/create-linkedin-post', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    // Format the post content with hashtags highlighted
+                    let formattedContent = data.post_content
+                        .replace(/\n/g, '<br>')
+                        .replace(/(#\w+)/g, '<span class="text-blue-600 font-medium">$1</span>');
+                    
+                    postContent.innerHTML = formattedContent;
+                    
+                    // Hide loader, show results
+                    loadingIndicator.classList.add('hidden');
+                    postResult.classList.remove('hidden');
+                    copyButton.classList.remove('hidden');
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    postContent.textContent = 'Error generating post: ' + error.message;
+                    loadingIndicator.classList.add('hidden');
+                    postResult.classList.remove('hidden');
+                }
+            });
+            
+            // Copy button functionality
+            copyButton.addEventListener('click', function() {
+                // Get text without HTML formatting
+                const contentHtml = document.getElementById('postContent').innerHTML;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = contentHtml;
+                const textContent = tempDiv.textContent || tempDiv.innerText || '';
+                
+                navigator.clipboard.writeText(textContent)
+                    .then(() => {
+                        const originalText = copyButton.textContent;
+                        copyButton.textContent = 'Copied!';
+                        setTimeout(() => {
+                            copyButton.textContent = originalText;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                    });
+            });
+        });
+    </script>
+</body>
+</html>
