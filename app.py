@@ -1,26 +1,36 @@
-# app.py - Updated Flask application with additional features
+# app.py - Updated Flask application with Hugging Face API integration
 from flask import Flask, request, jsonify, render_template
 import requests
 import json
 import os
+
+api_key = os.environ.get("HF_API_KEY")
+
 from typing import Dict, List, Any, Optional
 import time
 import re
 
+
+
 app = Flask(__name__)
 
 # Configuration
-OLLAMA_API_URL = "http://localhost:11434/api/generate"
+# Replace this with your Hugging Face API key
+HUGGINGFACE_API_KEY = os.environ.get("HUGGINGFACE_API_KEY", "")  
+# Default to a Llama3 model on Hugging Face
+DEFAULT_MODEL = "google/gemma-7b" 
+HUGGINGFACE_API_URL = "https://api-inference.huggingface.co/models/"
 
 class Agent:
-    def __init__(self, name: str, role: str, system_prompt: str):
+    def __init__(self, name: str, role: str, system_prompt: str, model: str = DEFAULT_MODEL):
         self.name = name
         self.role = role
         self.system_prompt = system_prompt
+        self.model = model
         self.conversation_history = []
     
-    def query_ollama(self, prompt: str) -> str:
-        """Query the local Ollama model with the agent's context"""
+    def query_huggingface(self, prompt: str) -> str:
+        """Query the Hugging Face API with the agent's context"""
         full_prompt = f"{self.system_prompt}\n\nConversation history:\n"
         
         # Add conversation history (limited to last 5 exchanges for context)
@@ -29,26 +39,48 @@ class Agent:
         
         full_prompt += f"Human: {prompt}\n{self.name}:"
         
+        # Set up headers with the API key
+        headers = {
+            "Authorization": f"Bearer {HUGGINGFACE_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        # Payload for text generation
         payload = {
-            "model": "llama3.2:latest",
-            "prompt": full_prompt,
-            "stream": False,
-            "temperature": 0.7,
-            "max_tokens": 1024
+            "inputs": full_prompt,
+            "parameters": {
+                "temperature": 0.7,
+                "max_new_tokens": 1024,
+                "return_full_text": False
+            }
         }
         
         try:
-            response = requests.post(OLLAMA_API_URL, json=payload)
+            # Make request to the Hugging Face API
+            response = requests.post(
+                f"{HUGGINGFACE_API_URL}{self.model}",
+                headers=headers,
+                json=payload
+            )
             response.raise_for_status()
+            
+            # Parse the response
             result = response.json()
-            return result["response"]
+            # The structure of the response varies by model, but most return a list
+            if isinstance(result, list) and len(result) > 0:
+                if "generated_text" in result[0]:
+                    return result[0]["generated_text"]
+            
+            # Handle other response formats
+            return str(result)
+            
         except Exception as e:
-            return f"Error communicating with Ollama: {str(e)}"
+            return f"Error communicating with Hugging Face API: {str(e)}"
     
     def process_task(self, task: str) -> str:
         """Process a task and update conversation history"""
         self.conversation_history.append({"role": "Human", "content": task})
-        response = self.query_ollama(task)
+        response = self.query_huggingface(task)
         self.conversation_history.append({"role": self.name, "content": response})
         return response
 
@@ -102,10 +134,16 @@ class AgentSystem:
         Always focus on professionalism while maintaining an engaging, authentic voice.
         """
         
-        self.researcher = Agent("Researcher", "Research Specialist", researcher_prompt)
-        self.writer = Agent("Writer", "Content Creator", writer_prompt)
-        self.resume_builder = Agent("ResumeBuilder", "Resume Expert", resume_prompt)
-        self.linkedin_agent = Agent("LinkedInAgent", "Social Media Expert", linkedin_prompt)
+        # You can use different models for different agents if needed
+        researcher_model = "mistralai/Mistral-7B-Instruct-v0.2"  # This may already be accessible
+        writer_model = "google/gemma-7b"  # Change from Meta-Llama-3-8B
+        resume_model = "mistralai/Mistral-7B-Instruct-v0.2"  # This looks fine
+        linkedin_model = "google/gemma-7b"  # Change from Meta-Llama-3-8B
+        
+        self.researcher = Agent("Researcher", "Research Specialist", researcher_prompt, researcher_model)
+        self.writer = Agent("Writer", "Content Creator", writer_prompt, writer_model)
+        self.resume_builder = Agent("ResumeBuilder", "Resume Expert", resume_prompt, resume_model)
+        self.linkedin_agent = Agent("LinkedInAgent", "Social Media Expert", linkedin_prompt, linkedin_model)
         self.workflow_history = []
     
     def execute_workflow(self, user_task: str) -> Dict[str, Any]:
@@ -171,7 +209,7 @@ class AgentSystem:
         return text
     
     def create_linkedin_post(self, post_info: Dict[str, Any]) -> str:
-        """Create a LinkedIn post based on user information"""
+        """Create a LinkedIn post based on user information , do not give any explanation just return the post"""
         prompt = f"""Create an engaging LinkedIn post about:
         
         Topic: {post_info.get('topic', 'N/A')}
